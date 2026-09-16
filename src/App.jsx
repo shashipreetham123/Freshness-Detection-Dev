@@ -13,7 +13,7 @@ function App() {
   useEffect(() => {
     async function loadModel() {
       try {
-        const loadedModel = await tf.loadGraphModel("/Freshness-Detection-App/model/v2/model.json");
+        const loadedModel = await tf.loadGraphModel("/Freshness-Detection-App/model/v1/model.json");
         setModel(loadedModel);
       } catch (error) {
         console.error("Error loading model:", error);
@@ -54,7 +54,7 @@ function App() {
 
       const inputTensor = tf.browser
         .fromPixels(image)
-        .resizeBilinear([256, 256])
+        .resizeBilinear([224, 224])
         .toFloat()
         .expandDims(0);
 
