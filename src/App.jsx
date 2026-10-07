@@ -13,7 +13,7 @@ function App() {
   useEffect(() => {
     async function loadModel() {
       try {
-        const loadedModel = await tf.loadGraphModel("/Freshness-Detection-App/model/v1/model.json");
+        const loadedModel = await tf.loadGraphModel("/Freshness-Detection-App/model/v4-resnet50/model.json");
         setModel(loadedModel);
       } catch (error) {
         console.error("Error loading model:", error);
@@ -58,19 +58,29 @@ function App() {
         .toFloat()
         .expandDims(0);
 
-      const output = model.execute(inputTensor);
-      const values = Array.from(await output.data());
 
-      const classNames = [
-        "Fresh",
-        "Rotten"
-      ];
+      
+      // For Sigmoid & Binary Cross Entropy
 
-      const maxIndex = values.indexOf(Math.max(...values));
+      const output = await model.predict(inputTensor);
 
-      const confidence = values[maxIndex] * 100;
+      const prediction = await output.data()
 
-      setPredictText(`${classNames[maxIndex]} : ${confidence.toFixed(2)}%`)
+      const probability = prediction[0]
+
+      const confidence = probability >= 0.5 ? 
+      100 * probability : 
+      100 * (1 - probability)
+
+      let label = ""
+
+      if (probability >= 0.5) {
+        label = "Rotten"
+      } else {
+        label = "Fresh"
+      }
+
+      setPredictText(`${label} : ${confidence.toFixed(2)}%`)
 
       inputTensor.dispose();
       output.dispose();
